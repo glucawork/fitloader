@@ -1,0 +1,8 @@
+[general]
+name=FitLoader
+description=Plugin to import FIT files and create point layers from activity records
+version=1.0
+qgisMinimumVersion=3.0
+author=Gianluca Rossi
+email=...
+category=Vector
