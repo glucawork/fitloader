@@ -82,10 +82,12 @@ class FitLoaderPlugin:
         fields =  QgsFields()
 
         for field in fields_list:
-            if field in ('timestamp', 'activity_type'):
+            if field == 'activity_type':
                 fields.append( QgsField(field, QMetaType.QString) )
+            elif field == 'timestamp':
+                fields.append( QgsField(field, QMetaType.QDateTime) )
             else:
-                fields.append( QgsField(field, QMetaType.QString) )
+                fields.append( QgsField(field, QMetaType.Double) )
         
         pr.addAttributes(fields)
         layer.updateFields()
