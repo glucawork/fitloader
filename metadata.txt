@@ -6,3 +6,4 @@ qgisMinimumVersion=3.0
 author=Gianluca Rossi
 email=...
 category=Vector
+icon=icons/fit_loader.png
