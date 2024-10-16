@@ -22,6 +22,8 @@ class FitLoaderPlugin:
         self.action.triggered.connect(self.run)
         # Add the action to the QGIS plugin menu under "FitLoader"
         self.iface.addPluginToMenu("&FitLoader", self.action)
+        self.iface.addToolBarIcon(self.action)
+
 
     def unload(self):
         """Remove the plugin's action from the QGIS GUI when the plugin is unloaded."""
