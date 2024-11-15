@@ -1,9 +1,11 @@
 [general]
 name=FitLoader
-description=Plugin to import FIT files and create point layers from activity records
-version=1.0
+description=A simple plugin to import FIT files
 qgisMinimumVersion=3.0
 author=Gianluca Rossi
-email=...
+email=gluca.rossi@gmail.com
 category=Vector
 icon=icons/fit_loader.png
+tags=python,garmin,FIT,fitparse
+homepage=
+category=Plugins
