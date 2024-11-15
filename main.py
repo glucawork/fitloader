@@ -99,7 +99,8 @@ class FitLoaderPlugin:
             
             #QgsMessageLog.logMessage('qua', 'FitLoader', 0)   
             
-            # we are interested in georeferenced activities
+            # we are interested in georeferenced records
+        
             if 'position_lat' not in dict_record:
                 continue
 
