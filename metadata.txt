@@ -5,6 +5,7 @@ qgisMinimumVersion=3.0
 author=Gianluca Rossi
 email=gluca.rossi@gmail.com
 category=Vector
+version=1.0.1
 icon=icons/fit_loader.png
 tags=python,garmin,FIT,fitparse,vector,importer
 homepage=https://github.com/glucawork/fitloader
@@ -12,3 +13,7 @@ repository=https://github.com/glucawork/fitloader
 tracker=https://github.com/glucawork/fitloader/issues
 plugin_dependencies=python-fitparse
 about=This plugin imports FIT files into a point vector layer, utilizing the python-fitparse module. Only records with geographic coordinates are included, so activities recorded indoors, for instance, will be excluded. All data from the imported records are stored as attributes in the point vector layer.
+changelog=Versions:
+    1.0.1 - Replace QMetaData with QVariant to guarantee compatibility with 3.34 version LTR
+            Add one more field (num_seg) that enumerates the subtracks created with start and stop signals
+    1.0   - First stable version

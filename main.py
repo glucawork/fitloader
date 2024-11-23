@@ -1,6 +1,6 @@
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox
 from qgis.core import QgsProject, QgsFeature, QgsGeometry, QgsPointXY, QgsVectorLayer, QgsField,  QgsFields
-from PyQt5.QtCore import  QMetaType
+from PyQt5.QtCore import  QMetaType, QVariant
 from PyQt5.QtGui import QIcon
 from fitparse import FitFile
 import os
@@ -82,49 +82,64 @@ class FitLoaderPlugin:
 
         for field in fields_list:
             if field == 'activity_type':
-                fields.append( QgsField(field, QMetaType.QString) )
+                fields.append( QgsField(field, QVariant.String) )
             elif field == 'timestamp':
-                fields.append( QgsField(field, QMetaType.QDateTime) )
+                #fields.append( QgsField(field) )
+                fields.append( QgsField(field, QVariant.DateTime) )
             else:
-                fields.append( QgsField(field, QMetaType.Double) )
+                fields.append( QgsField(field, QVariant.Double) )
+        
+        # Integer from 0 that identifies the subtrack that correspond
+        # to stop and restart in the recording data
+        fields.append( QgsField('seg_num', QVariant.Int) )
         
         pr.addAttributes(fields)
         layer.updateFields()
         
+        curr_seg_num = 0
+        no_records = True # True iff no records before next event start
         
         # Loop through the "record" messages in the FIT file (these contain activity data)
-        for record in fitfile.get_messages("record"):
-            # from record to a dictionary
-            dict_record = record.get_values()
+        for msg in fitfile.messages:
+            if msg.name == 'record':
+                record = msg
+                # from record to a dictionary
+                dict_record = record.get_values()
+                
+                #QMessageBox.critical(None, "Qua")   
+                
+                # we are interested in georeferenced records
             
-            #QgsMessageLog.logMessage('qua', 'FitLoader', 0)   
-            
-            # we are interested in georeferenced records
-        
-            if 'position_lat' not in dict_record:
-                continue
-
-            dict_record['position_lat'] = dict_record['position_lat']*180/2**31
-            dict_record['position_long'] = dict_record['position_long']*180/2**31
-            
-            #QgsMessageLog.logMessage(str(dict_record['position_lat']), 'FitLoader', 0)
-
-            # Create a point geometry with longitude and latitude
-            point = QgsPointXY(dict_record['position_long'], dict_record['position_lat'])
-            # Create a new feature for the point
-            feature = QgsFeature()
-            feature.setFields(fields)
-            
-            # Set the feature's attributes (timestamp, lat, lon, speed, and cadence)
-            for x in dict_record:
-                #QgsMessageLog.logMessage(x  , 'FitLoader', 0)
-                if x in ('timestamp', 'activity_type'):
-                    feature.setAttribute(x, str(dict_record[x]) )
-                else:
-                    feature.setAttribute(x, dict_record[x] )
-            # Add the feature to the list of features
-            feature.setGeometry(QgsGeometry.fromPointXY(point))
-            pr.addFeature(feature)
+                if 'position_lat' not in dict_record:
+                    continue
+    
+                dict_record['position_lat'] = dict_record['position_lat']*180/2**31
+                dict_record['position_long'] = dict_record['position_long']*180/2**31
+                
+                #QgsMessageLog.logMessage(str(dict_record['position_lat']), 'FitLoader', 0)
+    
+                # Create a point geometry with longitude and latitude
+                point = QgsPointXY(dict_record['position_long'], dict_record['position_lat'])
+                # Create a new feature for the point
+                feature = QgsFeature()
+                feature.setFields(fields)
+                
+                # Set the feature's attributes (timestamp, lat, lon, speed, and cadence)
+                for x in dict_record:
+                    #QgsMessageLog.logMessage(x  , 'FitLoader', 0)
+                    if x in ('timestamp', 'activity_type'):
+                        feature.setAttribute(x, str(dict_record[x]) )
+                    else:
+                        feature.setAttribute(x, dict_record[x] )
+                # Add the feature to the list of features
+                feature.setGeometry(QgsGeometry.fromPointXY(point))
+                feature.setAttribute('seg_num', curr_seg_num)
+                pr.addFeature(feature)
+                no_records = False
+            elif  no_records == False and msg.name == 'event' and\
+                    msg.get_values()['event'] == 'timer' and msg.get_values()['event_type'] == 'start':
+                curr_seg_num += 1
+                no_records = True
 
 
         # Add all the features to the layer
