@@ -1,6 +1,6 @@
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox
 from qgis.core import QgsProject, QgsFeature, QgsGeometry, QgsPointXY, QgsVectorLayer, QgsField,  QgsFields
-from PyQt5.QtCore import  QMetaType, QVariant
+from PyQt5.QtCore import  QMetaType, QVariant, QFileInfo
 from PyQt5.QtGui import QIcon
 from fitparse import FitFile
 import os
@@ -42,16 +42,18 @@ class FitLoaderPlugin:
         try:
             # Load the selected FIT file using the fitparse library
             fitfile = FitFile(fit_path)
+            # Determine the base name of the input file
+            fit_name = QFileInfo(fit_path).completeBaseName()
             # Call the function to create a layer from the FIT file data
-            self.create_layer_from_fit(fitfile)
+            self.create_layer_from_fit(fitfile, fit_name)
         except Exception as e:
             # Display an error message if loading the file fails
             QMessageBox.critical(None, "Error", f"Failed to load FIT file: {e}")
 
-    def create_layer_from_fit(self, fitfile):
+    def create_layer_from_fit(self, fitfile, layer_name):
         """Create a point layer in QGIS based on the records from the FIT file."""
         # Create a new memory-based point layer with EPSG:4326 (WGS84)
-        layer = QgsVectorLayer("Point?crs=EPSG:4326", "FIT Activity Points", "memory")
+        layer = QgsVectorLayer("Point?crs=EPSG:4326", layer_name, "memory")
         if not layer.isValid():
             # Display an error message if the layer creation fails
             QMessageBox.critical(None, "Error", "Failed to create layer")
